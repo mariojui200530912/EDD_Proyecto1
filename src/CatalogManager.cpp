@@ -18,10 +18,12 @@ void CatalogManager::loadCatalogFromCSV(const std::string& filename) {
 
     int successCount = 0;
     int duplicateCount = 0;
+    // Acumuladores de tiempo (en microsegundos)
+    double tHash = 0, tSeq = 0, tOrd = 0, tAvl = 0, tBTree = 0, tBPlus = 0;
 
     // Intentamos insertar cada producto del buffer en nuestro sistema
     for (Product* p : buffer) {
-        if (addProduct(p)) {
+        if (addProduct(p, tHash, tSeq, tOrd, tAvl, tBTree, tBPlus)) {
             successCount++;
         } else {
             // Si addProduct devuelve false, era un duplicado. Destruimos el objeto de la memoria RAM porque ninguna estructura lo guardó.
@@ -30,25 +32,61 @@ void CatalogManager::loadCatalogFromCSV(const std::string& filename) {
         }
     }
 
-    std::cout << "Carga finalizada en las estructuras.\n";
+    std::cout << "\n--- Resumen de Carga y Tiempos de Insercion ---\n";
     std::cout << "Insertados con exito: " << successCount << "\n";
-    std::cout << "Omitidos por codigo duplicado: " << duplicateCount << "\n";
+    std::cout << "Omitidos por duplicado: " << duplicateCount << "\n\n";
+
+    std::cout << "[Tiempos Acumulados de Insercion de los " << successCount << " productos]\n";
+    std::cout << "1. Tabla Hash        (O(1))    : " << tHash << " us\n";
+    std::cout << "2. Lista Secuencial  (O(1))    : " << tSeq << " us\n";
+    std::cout << "3. Lista Ordenada    (O(n))    : " << tOrd << " us\n";
+    std::cout << "4. Arbol AVL         (O(log n)): " << tAvl << " us\n";
+    std::cout << "5. Arbol B  (Fechas) (O(log n)): " << tBTree << " us\n";
+    std::cout << "6. Arbol B+ (Categ.) (O(log n)): " << tBPlus << " us\n";
+    std::cout << "-----------------------------------------------\n";
 }
 
-bool CatalogManager::addProduct(Product* p) {
-    // Validar unicidad usando la Tabla Hash (O(1))
+bool CatalogManager::addProduct(Product* p, double& tHash, double& tSeq, double& tOrd, double& tAvl, double& tBTree, double& tBPlus) {
+
+    // Cronometrar Hash
+    auto start = std::chrono::high_resolution_clock::now();
     if (!hashTable.insert(p)) {
-        return false; // El codigo ya existe, abortamos la insercion en las demas
+        return false; // Duplicado
     }
+    auto end = std::chrono::high_resolution_clock::now();
+    tHash += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
-    // Si pasó la prueba, propagamos la insercion a las demas estructuras
-    sequentialList.insertFront(p); // O(1)
-    orderedList.insertSorted(p);   // O(n)
-    avlTree.insert(p);             // O(log n)
-    bTree.insert(p);               // O(log n)
+    // Cronometrar Lista Secuencial
+    start = std::chrono::high_resolution_clock::now();
+    sequentialList.insertFront(p);
+    end = std::chrono::high_resolution_clock::now();
+    tSeq += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+
+    // Cronometrar Lista Ordenada
+    start = std::chrono::high_resolution_clock::now();
+    orderedList.insertSorted(p);
+    end = std::chrono::high_resolution_clock::now();
+    tOrd += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+
+    // Cronometrar AVL Tree
+    start = std::chrono::high_resolution_clock::now();
+    avlTree.insert(p);
+    end = std::chrono::high_resolution_clock::now();
+    tAvl += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+
+    // Cronometrar B-Tree
+    start = std::chrono::high_resolution_clock::now();
+    bTree.insert(p);
+    end = std::chrono::high_resolution_clock::now();
+    tBTree += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+
+    // Cronometrar B+ Tree
+    start = std::chrono::high_resolution_clock::now();
     bPlusTree.insert(p);
+    end = std::chrono::high_resolution_clock::now();
+    tBPlus += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
-    return true; // Insercion atomizada exitosa
+    return true;
 }
 
 Product* CatalogManager::searchByBarcode(const std::string& barcode) const {

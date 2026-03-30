@@ -10,12 +10,13 @@ void mostrarMenu()
     std::cout << "1. Cargar productos desde CSV\n";
     std::cout << "2. Buscar producto por Codigo de Barra (Hash)\n";
     std::cout << "3. Buscar producto por Nombre (AVL)\n";
-    std::cout << "4. Eliminar producto\n";
-    std::cout << "5. Buscar productos por rango de fecha de Expiracion\n";
-    std::cout << "6. Buscar productos por categoria\n";
-    std::cout << "7. Pruebas comparativas de Busqueda (Listas Enlazadas-Secuencial y AVL-Binaria)\n";
-    std::cout << "8. Generar visualizacion de los Arboles\n";
-    std::cout << "9. Salir\n";
+    std::cout << "4. Buscar productos por rango de fecha de Expiracion\n";
+    std::cout << "5. Buscar productos por categoria\n";
+    std::cout << "6. Eliminar producto\n";
+    std::cout << "7. Listar catalogo ordenado alfabeticamente (AVL In-Order)\n"; // <-- NUEVA
+    std::cout << "8. Pruebas comparativas de Busqueda\n"; // <-- Era la 7
+    std::cout << "9. Generar visualizacion de los Arboles\n"; // <-- Era la 8
+    std::cout << "10. Salir\n"; // <-- Era la 9
     std::cout << "=========================================\n";
     std::cout << "Seleccione una opcion: ";
 }
@@ -26,7 +27,7 @@ int main()
     int opcion = 0;
     std::string inputStr;
 
-    while (opcion != 5)
+    while (opcion != 10)
     {
         mostrarMenu();
 
@@ -84,6 +85,24 @@ int main()
             }
         case 4:
             {
+                std::string start, end;
+                std::cout << "Ingrese fecha de inicio (AAAA-MM-DD): ";
+                std::cin >> start;
+                std::cout << "Ingrese fecha de fin (AAAA-MM-DD): ";
+                std::cin >> end;
+
+                manager.searchByDateRange(start, end);
+                break;
+            }
+        case 5:
+            {
+                std::cout << "Ingrese la categoria a buscar (ej. Lacteos, Bebidas): ";
+                std::cin >> inputStr;
+                manager.searchByCategory(inputStr);
+                break;
+            }
+        case 6:
+            {
                 std::cout << "Ingrese el codigo de barra del producto a eliminar: ";
                 std::cin >> inputStr;
                 if (manager.removeProduct(inputStr))
@@ -96,25 +115,14 @@ int main()
                 }
                 break;
             }
-        case 5:
+        case 7:
             {
-                std::string start, end;
-                std::cout << "Ingrese fecha de inicio (AAAA-MM-DD): ";
-                std::cin >> start;
-                std::cout << "Ingrese fecha de fin (AAAA-MM-DD): ";
-                std::cin >> end;
-
-                manager.searchByDateRange(start, end);
+                std::cout << "\nGenerando listado in-order desde el Arbol AVL...\n";
+                manager.printCatalogAlphabetically();
                 break;
             }
-        case 6:
+        case 8:
             {
-                std::cout << "Ingrese la categoria a buscar (ej. Lacteos, Bebidas): ";
-                std::cin >> inputStr;
-                manager.searchByCategory(inputStr);
-                break;
-            }
-        case 7: {
                 int nConsultas, mRepeticiones;
                 std::cout << "--- Pruebas de Rendimiento ---\n";
                 std::cout << "Ingrese la cantidad de consultas a buscar (N): ";
@@ -124,15 +132,17 @@ int main()
 
                 manager.runPerformanceTests(nConsultas, mRepeticiones);
                 break;
-        }
-        case 8:
+            }
+        case 9:
             {
                 manager.exportTreesToGraphviz();
                 break;
             }
-        case 9:
-            std::cout << "Saliendo del sistema. Limpiando memoria...\n";
-            break;
+        case 10:
+            {
+                std::cout << "Saliendo del sistema. Limpiando memoria...\n";
+                break;
+            }
         default:
             std::cout << "Opcion invalida. Intente de nuevo.\n";
         }

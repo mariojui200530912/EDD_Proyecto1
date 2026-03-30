@@ -109,3 +109,53 @@ void LinkedList::print() const {
         current = current->next;
     }
 }
+
+LinkedList::LinkedList(const LinkedList& other) {
+    head = nullptr;
+    Node* current = other.head;
+    Node* tail = nullptr;
+
+    while (current != nullptr) {
+        Node* newNode = new Node(current->data); // Clonamos el contenedor
+        newNode->next = nullptr;
+        if (head == nullptr) {
+            head = newNode;
+            tail = newNode;
+        } else {
+            tail->next = newNode;
+            tail = newNode;
+        }
+        current = current->next;
+    }
+}
+
+// --- OPERADOR DE ASIGNACIÓN (=) ---
+LinkedList& LinkedList::operator=(const LinkedList& other) {
+    if (this == &other) return *this; // Evitar auto-asignación
+
+    // Primero destruimos la lista actual para evitar fugas
+    Node* current = head;
+    while (current != nullptr) {
+        Node* nextNode = current->next;
+        delete current;
+        current = nextNode;
+    }
+    head = nullptr;
+
+    // Luego clonamos la nueva
+    Node* otherCurrent = other.head;
+    Node* tail = nullptr;
+    while (otherCurrent != nullptr) {
+        Node* newNode = new Node(otherCurrent->data);
+        newNode->next = nullptr;
+        if (head == nullptr) {
+            head = newNode;
+            tail = newNode;
+        } else {
+            tail->next = newNode;
+            tail = newNode;
+        }
+        otherCurrent = otherCurrent->next;
+    }
+    return *this;
+}

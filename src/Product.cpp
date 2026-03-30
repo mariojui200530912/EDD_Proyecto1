@@ -8,9 +8,9 @@ Product::Product(std::string n, std::string bc, std::string cat,
       brand(br), price(p), stock(s) {}
 
 void Product::print() const {
-    std::cout << "Código: " << barcode
+    std::cout << "Codigo: " << barcode
               << " | Nombre: " << name
-              << " | Categoría: " << category
+              << " | Categoria: " << category
               << " | Caducidad: " << expiry_date
               << " | Marca: " << brand
               << " | Precio: $" << price

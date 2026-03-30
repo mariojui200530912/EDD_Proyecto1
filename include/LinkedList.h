@@ -19,6 +19,8 @@ private:
 public:
     LinkedList();
     ~LinkedList();
+    LinkedList(const LinkedList& other);
+    LinkedList& operator=(const LinkedList& other);
     bool isEmpty() const;
     void insertFront(Product* p);
     void insertSorted(Product* p);

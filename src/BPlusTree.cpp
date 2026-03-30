@@ -10,6 +10,10 @@ BPlusTreeNode::BPlusTreeNode(int _t, bool _leaf) {
 
     keys = new CategoryKey[2 * t - 1];
     children = new BPlusTreeNode*[2 * t];
+
+    for (int i = 0; i < 2 * t; i++) {
+        children[i] = nullptr;
+    }
 }
 
 // --- Destructor del Nodo ---

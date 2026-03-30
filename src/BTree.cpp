@@ -23,13 +23,15 @@ BTree::~BTree() {
 BTreeNode::BTreeNode(int _t, bool _leaf) {
     t = _t;
     leaf = _leaf;
-    n = 0; // Al principio está vacío
-
-    // Un nodo puede tener máximo 2t - 1 llaves
+    n = 0;
+    // Un nodo puede tener maximo 2t - 1 llaves
     keys = new DateKey[2 * t - 1];
 
-    // Un nodo puede tener máximo 2t hijos
+    // Un nodo puede tener maximo 2t hijos
     children = new BTreeNode*[2 * t];
+    for (int i = 0; i < 2 * t; i++) {
+        children[i] = nullptr;
+    }
 }
 
 BTreeNode::~BTreeNode() {

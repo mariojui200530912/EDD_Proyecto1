@@ -30,7 +30,7 @@ public:
     void loadCatalogFromCSV(const std::string& filename);
 
     // Operaciones CRUD que orquestan a todas las estructuras
-    bool addProduct(Product* p);
+    bool addProduct(Product* p, double& tHash, double& tSeq, double& tOrd, double& tAvl, double& tBTree, double& tBPlus);
     bool removeProduct(const std::string& barcode);
 
     // Busquedas delegadas a la estructura mas eficiente
