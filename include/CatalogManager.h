@@ -8,6 +8,8 @@
 #include "BTree.h"
 #include "BPlusTree.h"
 #include <string>
+#include <random>
+#include <cstdlib>
 #include <vector>
 
 class CatalogManager {
@@ -36,6 +38,11 @@ public:
     Product* searchByName(const std::string& name) const;
     void searchByDateRange(const std::string& start, const std::string& end);
     void searchByCategory(const std::string& barcode) const;
+
+    // Funciones adicionales
+    void printCatalogAlphabetically() const;
+    void runPerformanceTests(int N, int M) const;
+    void exportTreesToGraphviz() const;
 
 };
 #endif //PROYECTO1_CATALOGMANAGER_H

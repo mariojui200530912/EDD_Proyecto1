@@ -13,8 +13,9 @@ void mostrarMenu()
     std::cout << "4. Eliminar producto\n";
     std::cout << "5. Buscar productos por rango de fecha de Expiracion\n";
     std::cout << "6. Buscar productos por categoria\n";
-    std::cout << "7. Generar visualizacion de los Arboles\n";
-    std::cout << "8. Salir\n";
+    std::cout << "7. Pruebas comparativas de Busqueda (Listas Enlazadas-Secuencial y AVL-Binaria)\n";
+    std::cout << "8. Generar visualizacion de los Arboles\n";
+    std::cout << "9. Salir\n";
     std::cout << "=========================================\n";
     std::cout << "Seleccione una opcion: ";
 }
@@ -113,13 +114,23 @@ int main()
                 manager.searchByCategory(inputStr);
                 break;
             }
+        case 7: {
+                int nConsultas, mRepeticiones;
+                std::cout << "--- Pruebas de Rendimiento ---\n";
+                std::cout << "Ingrese la cantidad de consultas a buscar (N): ";
+                std::cin >> nConsultas;
+                std::cout << "Ingrese la cantidad de repeticiones para promediar (M): ";
+                std::cin >> mRepeticiones;
+
+                manager.runPerformanceTests(nConsultas, mRepeticiones);
+                break;
+        }
         case 8:
             {
-                std::cout << "Generando visualizacion del Arbol AVL...\n";
-                manager.exportAVL();
+                manager.exportTreesToGraphviz();
                 break;
             }
-        case 7:
+        case 9:
             std::cout << "Saliendo del sistema. Limpiando memoria...\n";
             break;
         default:

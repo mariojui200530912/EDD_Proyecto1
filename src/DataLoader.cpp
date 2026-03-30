@@ -6,7 +6,7 @@
 // Funcion para escribir en el archivo de log de errores
 void DataLoader::logError(const std::string& message) {
     // ios::app abre el archivo en modo "append" (añadir al final)
-    std::ofstream logFile("data/errors.log", std::ios::app);
+    std::ofstream logFile("errors.log", std::ios::app);
     if (logFile.is_open()) {
         logFile << message << "\n";
         logFile.close();
@@ -20,6 +20,12 @@ std::vector<Product*> DataLoader::loadFromCSV(const std::string& filename) {
     // Verificar existencia del archivo
     if (!file.is_open()) {
         std::cerr << "Error crítico: No se pudo abrir el archivo " << filename << "\n";
+        return buffer;
+    }
+
+    if (file.peek() == std::ifstream::traits_type::eof()) {
+        std::cerr << "Aviso: El archivo " << filename << " esta completamente vacio.\n";
+        logError("Intento de carga con un archivo vacio: " + filename);
         return buffer;
     }
 

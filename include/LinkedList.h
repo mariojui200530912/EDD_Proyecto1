@@ -1,6 +1,7 @@
 #ifndef PROYECTO1_LINKEDLIST_H
 #define PROYECTO1_LINKEDLIST_H
 #include "Product.h"
+#include <vector>
 #include <string>
 
 struct Node
@@ -18,9 +19,11 @@ private:
 public:
     LinkedList();
     ~LinkedList();
+    bool isEmpty() const;
     void insertFront(Product* p);
     void insertSorted(Product* p);
-    Product* searchByName(const std::string& name);
+    Product* searchByName(const std::string& name) const;
+    std::vector<std::string> getAllNames() const;
     bool removeByBarCode(const std::string& barCode);
     void print() const;
 };

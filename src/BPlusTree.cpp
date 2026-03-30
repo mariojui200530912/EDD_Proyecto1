@@ -223,3 +223,265 @@ void BPlusTree::searchByCategory(const std::string& category) const {
     // Si revisamos la hoja y no estaba, es porque la categoría no existe
     std::cout << "\nNo se encontraron productos en la categoria: " << category << "\n";
 }
+
+// Funcion auxiliar para encontrar primera hoja
+BPlusTreeNode* BPlusTree::getLeftmostLeaf() const {
+    if (root == nullptr) return nullptr;
+
+    BPlusTreeNode* current = root;
+    while (!current->leaf) {
+        current = current->children[0];
+    }
+    return current;
+}
+
+void BPlusTree::removeProduct(const std::string& category, const std::string& barcode) {
+    if (root == nullptr) return;
+
+    BPlusTreeNode* current = root;
+    // Bajamos directamente a la hoja (fase iterativa)
+    while (!current->leaf) {
+        int i = 0;
+        while (i < current->n && category > current->keys[i].category) i++;
+        current = current->children[i];
+    }
+
+    // Buscamos en la hoja
+    for (int i = 0; i < current->n; i++) {
+        if (current->keys[i].category == category) {
+            current->keys[i].productsList.removeByBarCode(barcode);
+
+            // Si ya no hay productos en esta categoria, la borramos estructuralmente
+            if (current->keys[i].productsList.isEmpty()) {
+                removeCategory(category);
+            }
+            return;
+        }
+    }
+}
+
+void BPlusTree::removeCategory(const std::string& category) {
+    if (root == nullptr) return;
+
+    root->remove(category);
+
+    // Si la raíz se queda vacía después de borrar
+    if (root->n == 0) {
+        BPlusTreeNode* tmp = root;
+        if (root->leaf) {
+            root = nullptr;
+        } else {
+            root = root->children[0];
+        }
+        delete tmp;
+    }
+}
+
+int BPlusTreeNode::findKey(const std::string& category) {
+    int idx = 0;
+    while (idx < n && keys[idx].category < category) ++idx;
+    return idx;
+}
+
+void BPlusTreeNode::remove(const std::string& category) {
+    int idx = findKey(category);
+
+    // Si estamos en una hoja, hacemos la eliminación real
+    if (leaf) {
+        // Verificamos si la categoría realmente está aquí
+        if (idx < n && keys[idx].category == category) {
+            // Desplazamos las llaves a la izquierda para tapar el hueco
+            for (int i = idx + 1; i < n; ++i) {
+                keys[i - 1] = keys[i];
+            }
+            n--;
+        } else {
+            std::cout << "La categoria " << category << " no existe.\n";
+        }
+        return;
+    }
+
+    // Si NO somos hoja, solo estamos bajando guiados por los letreros
+    bool isLastChild = (idx == n);
+
+    // Asegurarnos de que el hijo al que bajamos tenga al menos 't' llaves
+    if (children[idx]->n < t) {
+        fill(idx);
+    }
+
+    // Si la función fill() causó que el último hijo se fusionara con el anterior, el índice baja
+    if (isLastChild && idx > n) {
+        children[idx - 1]->remove(category);
+    } else {
+        children[idx]->remove(category);
+    }
+}
+
+void BPlusTreeNode::fill(int idx) {
+    if (idx != 0 && children[idx - 1]->n >= t) {
+        borrowFromPrev(idx);
+    } else if (idx != n && children[idx + 1]->n >= t) {
+        borrowFromNext(idx);
+    } else {
+        if (idx != n) {
+            merge(idx);
+        } else {
+            merge(idx - 1);
+        }
+    }
+}
+
+void BPlusTreeNode::borrowFromPrev(int idx) {
+    BPlusTreeNode* child = children[idx];
+    BPlusTreeNode* sibling = children[idx - 1];
+
+    // Desplazamos todo en 'child' a la derecha
+    for (int i = child->n - 1; i >= 0; --i) {
+        child->keys[i + 1] = child->keys[i];
+    }
+    if (!child->leaf) {
+        for (int i = child->n; i >= 0; --i) {
+            child->children[i + 1] = child->children[i];
+        }
+    }
+
+    // Diferencia B+: Si es hoja, copiamos el dato real. Si es interno, bajamos el letrero.
+    if (child->leaf) {
+        child->keys[0] = sibling->keys[sibling->n - 1];
+        keys[idx - 1] = child->keys[0]; // Actualizamos el letrero en el padre
+    } else {
+        child->keys[0] = keys[idx - 1];
+        keys[idx - 1] = sibling->keys[sibling->n - 1];
+        child->children[0] = sibling->children[sibling->n];
+    }
+
+    child->n += 1;
+    sibling->n -= 1;
+}
+
+void BPlusTreeNode::borrowFromNext(int idx) {
+    BPlusTreeNode* child = children[idx];
+    BPlusTreeNode* sibling = children[idx + 1];
+
+    if (child->leaf) {
+        child->keys[child->n] = sibling->keys[0];
+        keys[idx] = sibling->keys[1]; // El letrero del padre ahora es el nuevo primero del hermano
+    } else {
+        child->keys[child->n] = keys[idx];
+        keys[idx] = sibling->keys[0];
+        child->children[child->n + 1] = sibling->children[0];
+    }
+
+    // Movemos todo en el hermano a la izquierda
+    for (int i = 1; i < sibling->n; ++i) {
+        sibling->keys[i - 1] = sibling->keys[i];
+    }
+    if (!sibling->leaf) {
+        for (int i = 1; i <= sibling->n; ++i) {
+            sibling->children[i - 1] = sibling->children[i];
+        }
+    }
+
+    child->n += 1;
+    sibling->n -= 1;
+}
+
+void BPlusTreeNode::merge(int idx) {
+    BPlusTreeNode* child = children[idx];
+    BPlusTreeNode* sibling = children[idx + 1];
+
+    if (child->leaf) {
+        // Fusión de HOJAS (El B+ en acción)
+        for (int i = 0; i < sibling->n; ++i) {
+            child->keys[child->n + i] = sibling->keys[i];
+        }
+        child->n += sibling->n;
+
+        // ¡SUPER IMPORTANTE! Mantenemos viva la lista enlazada inferior
+        child->next = sibling->next;
+    } else {
+        // Fusión de NODOS INTERNOS (Igual que el B-Tree normal)
+        child->keys[t - 1] = keys[idx];
+        for (int i = 0; i < sibling->n; ++i) {
+            child->keys[i + t] = sibling->keys[i];
+        }
+        for (int i = 0; i <= sibling->n; ++i) {
+            child->children[i + t] = sibling->children[i];
+        }
+        child->n += sibling->n + 1;
+    }
+
+    // Desplazamos en el padre para tapar el hueco del letrero que bajó o se eliminó
+    for (int i = idx + 1; i < n; ++i) {
+        keys[i - 1] = keys[i];
+    }
+    for (int i = idx + 2; i <= n; ++i) {
+        children[i - 1] = children[i];
+    }
+    n--;
+
+    delete sibling;
+}
+
+// --- Funcion Principal de Exportacion ---
+void BPlusTree::exportToDot(const std::string& filename) const {
+    std::ofstream out(filename);
+
+    if (!out.is_open()) {
+        std::cout << "Error: No se pudo abrir el archivo " << filename << "\n";
+        return;
+    }
+
+    out << "digraph BPlusTree {\n";
+    // Pintaremos el B+ de verde claro para distinguirlo del B normal
+    out << "    node [fontname=\"Arial\", shape=record, style=filled, fillcolor=lightgreen];\n";
+
+    if (root == nullptr) {
+        out << "    empty [label=\"Arbol B+ Vacio\"];\n";
+    } else {
+        // Dibujamos los nodos y las flechas padre-hijo normalmente
+        generateDotRecursively(root, out);
+
+        // Dibujamos la lista enlazada de las hojas
+        BPlusTreeNode* leaf = getLeftmostLeaf();
+        while (leaf != nullptr && leaf->next != nullptr) {
+            uintptr_t currentId = reinterpret_cast<uintptr_t>(leaf);
+            uintptr_t nextId = reinterpret_cast<uintptr_t>(leaf->next);
+
+            // constraint=false evita que Graphviz deforme el arbol verticalmente
+            out << "    node" << currentId << " -> node" << nextId
+                << " [color=blue, penwidth=2, constraint=false];\n";
+
+            leaf = leaf->next;
+        }
+    }
+
+    out << "}\n";
+    out.close();
+    std::cout << "Archivo " << filename << " generado con exito.\n";
+}
+
+// --- Funcion Recursiva para dibujar Cajas y Ramas ---
+void BPlusTree::generateDotRecursively(BPlusTreeNode* node, std::ofstream& out) const {
+    if (node == nullptr) return;
+
+    uintptr_t nodeId = reinterpret_cast<uintptr_t>(node);
+
+    // Construimos la "caja" del nodo con las categorias
+    out << "    node" << nodeId << " [label=\"";
+    for (int i = 0; i < node->n; i++) {
+        out << "<c" << i << "> | " << node->keys[i].category << " | ";
+    }
+    out << "<c" << node->n << ">\"];\n";
+
+    // Conectamos padres con hijos
+    if (!node->leaf) {
+        for (int i = 0; i <= node->n; i++) {
+            if (node->children[i] != nullptr) {
+                uintptr_t childId = reinterpret_cast<uintptr_t>(node->children[i]);
+                out << "    node" << nodeId << ":c" << i << " -> node" << childId << ";\n";
+                generateDotRecursively(node->children[i], out);
+            }
+        }
+    }
+}

@@ -31,6 +31,7 @@ private:
     AVLNode* insertNode(AVLNode* node, Product* p);
     AVLNode* removeNode(AVLNode* node, const std::string& name);
     AVLNode* findMin(AVLNode* node) const;
+    void printInOrderRecursively(AVLNode* node) const;
 
     void generateDotRecursively(AVLNode* node, std::ofstream& out) const;
 
@@ -41,6 +42,8 @@ public:
     void insert(Product* p);
     bool remove(const std::string& name);
     Product* searchByName(const std::string& name) const;
+    std::string getFirstAlphabetical() const;
+    std::string getLastAlphabetical() const;
     void printInOrder() const;
     void exportToDot(const std::string& filename) const;
 };

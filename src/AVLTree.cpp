@@ -223,6 +223,48 @@ bool AVLTree::remove(const std::string& name) {
     return true;
 }
 
+
+std::string AVLTree::getFirstAlphabetical() const {
+    if (root == nullptr) return "";
+    AVLNode* current = root;
+    while (current->left != nullptr) {
+        current = current->left;
+    }
+    return current->data->name;
+}
+
+std::string AVLTree::getLastAlphabetical() const {
+    if (root == nullptr) return "";
+    AVLNode* current = root;
+    while (current->right != nullptr) {
+        current = current->right;
+    }
+    return current->data->name;
+}
+
+void AVLTree::printInOrder() const {
+    if (root == nullptr) {
+        std::cout << "El catalogo esta vacio.\n";
+        return;
+    }
+    std::cout << "\n--- Catalogo Ordenado por Nombre (A-Z) ---\n";
+    printInOrderRecursively(root);
+    std::cout << "------------------------------------------\n";
+}
+
+void AVLTree::printInOrderRecursively(AVLNode* node) const {
+    if (node != nullptr) {
+        // Visitamos el subarbol izquierdo
+        printInOrderRecursively(node->left);
+
+        // Imprimimos el nodo actual usando el metodo de struct Product
+        node->data->print();
+
+        // Visitamos el subarbol derecho
+        printInOrderRecursively(node->right);
+    }
+}
+
 void AVLTree::exportToDot(const std::string& filename) const {
     // Abrimos (o creamos) el archivo de texto
     std::ofstream out(filename);

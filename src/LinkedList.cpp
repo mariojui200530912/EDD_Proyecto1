@@ -14,6 +14,11 @@ LinkedList::~LinkedList()
     }
 }
 
+bool LinkedList::isEmpty() const
+{
+    return head == nullptr;
+}
+
 void LinkedList::insertFront(Product* p)
 {
     Node* newNode = new Node(p);
@@ -21,7 +26,7 @@ void LinkedList::insertFront(Product* p)
     head = newNode;
 }
 
-Product* LinkedList::searchByName(const std::string& name)
+Product* LinkedList::searchByName(const std::string& name) const
 {
     Node* current = head;
     while (current != nullptr)
@@ -53,6 +58,16 @@ void LinkedList::insertSorted(Product* p)
     }
     newNode->next = current;
     previous->next = newNode;
+}
+
+std::vector<std::string> LinkedList::getAllNames() const {
+    std::vector<std::string> names;
+    Node* current = head;
+    while (current != nullptr) {
+        names.push_back(current->data->name);
+        current = current->next;
+    }
+    return names;
 }
 
 bool LinkedList::removeByBarCode(const std::string& barCode)
