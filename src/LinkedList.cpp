@@ -79,3 +79,18 @@ bool LinkedList::removeByBarCode(const std::string& barCode)
     delete current;
     return true;
 }
+
+void LinkedList::print() const {
+    Node* current = head;
+
+    if (current == nullptr) {
+        std::cout << "  [No hay productos en esta lista]\n";
+        return;
+    }
+
+    while (current != nullptr) {
+        current->data->print();
+
+        current = current->next;
+    }
+}

@@ -15,4 +15,8 @@ add_executable(Proyecto1 main.cpp
         include/AVLTree.h
         src/AVLTree.cpp
         include/CatalogManager.h
-        src/CatalogManager.cpp)
+        src/CatalogManager.cpp
+        include/BTree.h
+        src/BTree.cpp
+        include/BPlusTree.h
+        src/BPlusTree.cpp)

@@ -1,5 +1,21 @@
 #include "../include/AVLTree.h"
 
+AVLTree::AVLTree() {
+    root = nullptr;
+}
+
+void destroyTree(AVLNode* node) {
+    if (node != nullptr) {
+        destroyTree(node->left);
+        destroyTree(node->right);
+        delete node; // Destruimos el nodo, NO el Product
+    }
+}
+
+AVLTree::~AVLTree() {
+    destroyTree(root);
+}
+
 int AVLTree::getHeight(AVLNode* node) const
 {
     if (node == nullptr)
@@ -119,3 +135,142 @@ void AVLTree::insert(Product* p) {
     root = insertNode(root, p);
 }
 
+Product* AVLTree::searchByName(const std::string& name) const {
+    AVLNode* current = root;
+
+    while (current != nullptr) {
+        if (name < current->data->name) {
+            current = current->left; // Buscamos a la izquierda
+        }
+        else if (name > current->data->name) {
+            current = current->right; // Buscamos a la derecha
+        }
+        else {
+            return current->data; // Coincidencia exacta
+        }
+    }
+
+    return nullptr; // Llegamos al final de la hoja y no estaba
+}
+
+AVLNode* AVLTree::findMin(AVLNode* node) const {
+    AVLNode* current = node;
+    // Seguimos la izquierda mientras exista
+    while (current->left != nullptr) {
+        current = current->left;
+    }
+    return current;
+}
+
+AVLNode* AVLTree::removeNode(AVLNode* node, const std::string& name) {
+    // CASO BASE: Llegamos al final y no lo encontramos
+    if (node == nullptr) {
+        return node;
+    }
+
+    // FASE DE BUSQUEDA
+    if (name < node->data->name) {
+        node->left = removeNode(node->left, name);
+    }
+    else if (name > node->data->name) {
+        node->right = removeNode(node->right, name);
+    }
+    // SE ENCUENTRA DATO -- PROCEDE CON ELIMINACION
+    else {
+        // Escenario 1 y 2: El nodo tiene 0 o 1 hijo
+        if (node->left == nullptr || node->right == nullptr) {
+            // Guardamos el hijo que sí existe (si no hay ninguno, temp será nullptr)
+            AVLNode* temp = node->left ? node->left : node->right;
+
+            // Escenario 1: No tiene hijos
+            if (temp == nullptr) {
+                temp = node;
+                node = nullptr; // Marcamos el nodo actual como nulo
+            }
+            // Escenario 2: Tiene 1 hijo
+            else {
+                *node = *temp; // Copiamos el contenido del hijo al nodo actual
+            }
+            delete temp;
+        }
+        // Escenario 3: El nodo tiene 2 hijos
+        else {
+            // Buscamos al sucesor (el más pequeño del lado derecho)
+            AVLNode* temp = findMin(node->right);
+
+            // Copiamos SOLO EL PUNTERO del producto del sucesor a este nodo
+            node->data = temp->data;
+
+            // Mandamos a eliminar recursivamente al sucesor en la rama derecha
+            node->right = removeNode(node->right, temp->data->name);
+        }
+    }
+
+    // Si el arbol solo tenía 1 nodo y lo borramos, regresamos nulo
+    if (node == nullptr) {
+        return node;
+    }
+
+    // El nodo se audita a si mismo, recalcula su altura y aplica rotaciones si es necesario
+    return balance(node);
+}
+
+bool AVLTree::remove(const std::string& name) {
+    if (searchByName(name) == nullptr) {
+        return false;
+    }
+    root = removeNode(root, name);
+    return true;
+}
+
+void AVLTree::exportToDot(const std::string& filename) const {
+    // Abrimos (o creamos) el archivo de texto
+    std::ofstream out(filename);
+
+    if (!out.is_open()) {
+        std::cout << "Error: No se pudo crear el archivo " << filename << "\n";
+        return;
+    }
+
+    // Escribimos la cabecera estandar de Graphviz para grafos dirigidos (digraph)
+    out << "digraph AVLTree {\n";
+    // Le damos un poco de estilo visual a los nodos
+    out << "    node [fontname=\"Arial\", shape=circle, style=filled, fillcolor=lightblue];\n";
+
+    // Si el arbol esta vacio, dibujamos un nodo que lo indique
+    if (root == nullptr) {
+        out << "    empty [label=\"Arbol Vacio\"];\n";
+    } else {
+        // Iniciamos el viaje recursivo
+        generateDotRecursively(root, out);
+    }
+
+    // Cerramos la llave del grafo y el archivo
+    out << "}\n";
+    out.close();
+
+    std::cout << "Archivo " << filename << " generado con exito.\n";
+}
+
+void AVLTree::generateDotRecursively(AVLNode* node, std::ofstream& out) const {
+    if (node == nullptr) return;
+
+    // Declaramos el nodo actual.
+    // Usamos su dirección de memoria como ID interno unico para Graphviz
+    out << "    " << reinterpret_cast<uintptr_t>(node)
+        << " [label=\"" << node->data->name << "\\nBF: " << getBalanceFactor(node) << "\"];\n";
+
+    // Si tiene hijo izquierdo, declaramos la conexion (flecha) y bajamos recursivamente
+    if (node->left != nullptr) {
+        out << "    " << reinterpret_cast<uintptr_t>(node) << " -> "
+            << reinterpret_cast<uintptr_t>(node->left) << ";\n";
+        generateDotRecursively(node->left, out);
+    }
+
+    // Si tiene hijo derecho, declaramos la conexion y bajamos recursivamente
+    if (node->right != nullptr) {
+        out << "    " << reinterpret_cast<uintptr_t>(node) << " -> "
+            << reinterpret_cast<uintptr_t>(node->right) << ";\n";
+        generateDotRecursively(node->right, out);
+    }
+}

@@ -1,5 +1,31 @@
 #include "../include/HashTable.h"
 
+HashTable::HashTable(int cap) {
+    capacity = cap;
+    size = 0;
+    // Creamos el arreglo de punteros dinámicamente
+    table = new HashNode*[capacity];
+
+    // Inicializamos todos los cajones vacios (nullptr)
+    for (int i = 0; i < capacity; i++) {
+        table[i] = nullptr;
+    }
+}
+
+HashTable::~HashTable() {
+    // Recorremos cada cajon de la tabla
+    for (int i = 0; i < capacity; i++) {
+        HashNode* current = table[i];
+        // Destruimos la mini-lista enlazada de este cajón
+        while (current != nullptr) {
+            HashNode* nextNode = current->next;
+            delete current; // Destruimos el nodo, NO el Product
+            current = nextNode;
+        }
+    }
+    delete[] table;
+}
+
 int HashTable::hashFunction(const std::string& barcode) const
 {
     unsigned long hashValue = 0;
@@ -73,8 +99,6 @@ bool HashTable::remove(const std::string& barcode) {
     }
 
     delete current;
-
-    // 8. ¡IMPORTANTE! Restar al tamaño total para que tu análisis del Factor de Carga sea correcto
     size--;
     return true;
 }

@@ -5,6 +5,8 @@
 #include "LinkedList.h"
 #include "HashTable.h"
 #include "AVLTree.h"
+#include "BTree.h"
+#include "BPlusTree.h"
 #include <string>
 #include <vector>
 
@@ -15,6 +17,8 @@ private:
     LinkedList orderedList;    // Lista ordenada alfabéticamente
     HashTable hashTable;       // Busqueda por codigo de barra
     AVLTree avlTree;           // Busqueda por nombre
+    BTree bTree;               // Busqueda por rango de fechas
+    BPlusTree bPlusTree;       // Busqueda por categoria
 
 public:
     CatalogManager();
@@ -30,5 +34,8 @@ public:
     // Busquedas delegadas a la estructura mas eficiente
     Product* searchByBarcode(const std::string& barcode) const;
     Product* searchByName(const std::string& name) const;
+    void searchByDateRange(const std::string& start, const std::string& end);
+    void searchByCategory(const std::string& barcode) const;
+
 };
 #endif //PROYECTO1_CATALOGMANAGER_H

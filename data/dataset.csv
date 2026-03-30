@@ -1,0 +1,11 @@
+name,barcode,category,expiry_date,brand,price,stock
+Agua Mineral,75010111,Bebidas,2026-12-01,Bonafont,15.50,100
+Leche Deslactosada,75010222,Lacteos,2026-04-15,Lala,25.00,50
+Cereal de Chocolate,75010333,Abarrotes,2027-01-20,Kelloggs,45.00,30
+Queso Panela,75010444,Lacteos,2026-05-10,Fud,35.50,20
+Pan Integral,75010555,Panaderia,2026-04-05,Bimbo,40.00,40
+Agua Mineral Pirata,75010111,Bebidas,2026-12-01,Bonafalsa,10.00,100
+Manzana Roja,75010666,Frutas,2026-04-02,Granel,29.90,80
+Atun en Agua,75010777,Abarrotes,2028-02-15,Dolores,18.00,200
+Galletas Marias,75010888,Abarrotes,2026-08-10,Gamesa,14.50,150
+Jugo de Naranja,75010999,Bebidas,2026-05-20,Jumex,22.00,60

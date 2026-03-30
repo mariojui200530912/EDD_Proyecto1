@@ -4,6 +4,8 @@
 #include "Product.h"
 #include <string>
 #include <algorithm>
+#include <fstream>
+#include <cstdint>
 
 struct AVLNode {
     Product* data;
@@ -30,7 +32,7 @@ private:
     AVLNode* removeNode(AVLNode* node, const std::string& name);
     AVLNode* findMin(AVLNode* node) const;
 
-    void inOrderTraversal(AVLNode* node) const;
+    void generateDotRecursively(AVLNode* node, std::ofstream& out) const;
 
 public:
     AVLTree();
@@ -40,5 +42,6 @@ public:
     bool remove(const std::string& name);
     Product* searchByName(const std::string& name) const;
     void printInOrder() const;
+    void exportToDot(const std::string& filename) const;
 };
 #endif //PROYECTO1_AVLTREE_H

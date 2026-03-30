@@ -22,7 +22,7 @@ public:
     void insertSorted(Product* p);
     Product* searchByName(const std::string& name);
     bool removeByBarCode(const std::string& barCode);
-    void printAll() const;
+    void print() const;
 };
 
 #endif //PROYECTO1_LINKEDLIST_H

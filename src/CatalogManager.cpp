@@ -45,11 +45,10 @@ bool CatalogManager::addProduct(Product* p) {
     sequentialList.insertFront(p); // O(1)
     orderedList.insertSorted(p);   // O(n)
     avlTree.insert(p);             // O(log n)
+    bTree.insert(p);               // O(log n)
+    bPlusTree.insert(p);
 
-    // bTree.insert(p); ... más adelante
-    // bPlusTree.insert(p); ... más adelante
-
-    return true; // Inserción atomizada exitosa
+    return true; // Insercion atomizada exitosa
 }
 
 // Busquedas ultra rapidas delegando a la estructura correcta
@@ -61,27 +60,38 @@ Product* CatalogManager::searchByName(const std::string& name) const {
     return avlTree.searchByName(name);
 }
 
+void CatalogManager::searchByDateRange(const std::string& start, const std::string& end) {
+    bTree.searchByDateRange(start, end);
+}
+
+void CatalogManager::searchByCategory(const std::string& category) const {
+    bPlusTree.searchByCategory(category);
+}
+
 bool CatalogManager::removeProduct(const std::string& barcode) {
     Product* p = hashTable.search(barcode);
     if (p == nullptr) return false;
     std::string nameToRemove = p->name;
 
-    // --- 1. Cronometrar la Tabla Hash ---
+    // --- Cronometrar la Tabla Hash ---
     auto startHash = std::chrono::high_resolution_clock::now();
     hashTable.remove(barcode);
     auto endHash = std::chrono::high_resolution_clock::now();
     auto durationHash = std::chrono::duration_cast<std::chrono::microseconds>(endHash - startHash).count();
 
-    // --- 2. Cronometrar la Lista Enlazada ---
+    // --- Cronometrar la Lista Enlazada ---
     auto startList = std::chrono::high_resolution_clock::now();
     sequentialList.removeByBarCode(barcode);
     auto endList = std::chrono::high_resolution_clock::now();
     auto durationList = std::chrono::duration_cast<std::chrono::microseconds>(endList - startList).count();
 
-    // (Omitimos la lista ordenada aquí para no hacer largo el ejemplo)
+    // --- Cronometrar la Lista Ordenada ---
+    auto startListOrdered = std::chrono::high_resolution_clock::now();
     orderedList.removeByBarCode(barcode);
+    auto endListOrdered = std::chrono::high_resolution_clock::now();
+    auto durationListOrdered = std::chrono::duration_cast<std::chrono::microseconds>(endListOrdered - startListOrdered).count();
 
-    // --- 3. Cronometrar el Árbol AVL ---
+    // --- Cronometrar el Árbol AVL ---
     auto startAVL = std::chrono::high_resolution_clock::now();
     avlTree.remove(nameToRemove);
     auto endAVL = std::chrono::high_resolution_clock::now();
