@@ -1,5 +1,16 @@
 #include "../include/BTree.h"
 
+inline std::string sanitizeHTML(std::string text) {
+    std::string safeText = "";
+    for (char c : text) {
+        if (c == '&') safeText += "&amp;";
+        else if (c == '<') safeText += "&lt;";
+        else if (c == '>') safeText += "&gt;";
+        else safeText += c;
+    }
+    return safeText;
+}
+
 BTree::BTree(int _t) {
     root = nullptr;
     t = _t;
@@ -171,12 +182,7 @@ void BTree::insert(Product* p) {
 
 // funcion recursiva en el nodo
 void BTreeNode::searchByDateRange(const std::string& start, const std::string& end) {
-    int i = 0;
-
-    // Buscar la primera fecha que sea mayor o igual a 'start'
-    while (i < n && keys[i].date < start) {
-        i++;
-    }
+    int i = findKey(start);
 
     // Empezamos a recorrer desde ese punto válido
     for (; i < n; i++) {
@@ -462,54 +468,68 @@ void BTreeNode::merge(int idx) {
 
 void BTree::exportToDot(const std::string& filename) const {
     std::ofstream out(filename);
-
     if (!out.is_open()) {
         std::cout << "Error: No se pudo crear el archivo " << filename << "\n";
         return;
     }
 
     out << "digraph BTree {\n";
-    // shape=record hace que los nodos sean cajas divididas
-    out << "    node [fontname=\"Arial\", shape=record, style=filled, fillcolor=lightyellow];\n";
+
+    // --- NUEVO ESTILO GLOBAL NARANJA ---
+    out << "    fontname=\"Helvetica,Arial,sans-serif\";\n";
+    out << "    label=\"Indice por Fecha de Caducidad (Arbol B)\";\n";
+    out << "    labelloc=\"t\"; fontsize=20;\n";
+    out << "    nodesep=0.8; ranksep=1.0;\n\n";
+
+    out << "    // Usaremos shape=plaintext para usar tablas HTML modernas\n";
+    out << "    node [fontname=\"Helvetica,Arial,sans-serif\", shape=plaintext];\n";
+    out << "    edge [fontname=\"Helvetica,Arial,sans-serif\", color=\"#CC3300\", penwidth=1.5];\n\n";
 
     if (root == nullptr) {
-        out << "    empty [label=\"Arbol B Vacio\"];\n";
+        out << "    empty [label=\"Arbol B Vacio\", shape=plaintext, fontcolor=red];\n";
     } else {
         generateDotRecursively(root, out);
     }
 
     out << "}\n";
     out.close();
-
     std::cout << "Archivo " << filename << " generado con exito.\n";
 }
 
 void BTree::generateDotRecursively(BTreeNode* node, std::ofstream& out) const {
     if (node == nullptr) return;
 
-    // Identificador unico del nodo basado en su memoria
     uintptr_t nodeId = reinterpret_cast<uintptr_t>(node);
 
-    // Construimos la "caja" del nodo.
-    // El formato sera algo como: <c0> | 2026-04-15 | <c1> | 2026-05-20 | <c2>
-    out << "    node" << nodeId << " [label=\"";
-    for (int i = 0; i < node->n; i++) {
-        // <c...> es el "puerto" de donde saldra la flecha para el hijo izquierdo
-        out << "<c" << i << "> | " << node->keys[i].date << " | ";
-    }
-    // El ultimo puerto para el hijo derecho extremo
-    out << "<c" << node->n << ">\"];\n";
+    // --- DISEÑO DE TABLA HTML PARA ARBOL B (Tonos Naranjas) ---
+    out << "    node" << nodeId << " [label=<\n";
+    out << "      <TABLE BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" BGCOLOR=\"#FFEBE6\">\n";
+    out << "      <TR>\n";
 
-    // Si no es hoja, dibujamos las flechas hacia sus hijos
+    for (int i = 0; i < node->n; i++) {
+        // Envolvemos la fecha con sanitizeHTML
+        out << "        <TD PORT=\"c" << i << "\"><b>" << sanitizeHTML(node->keys[i].date) << "</b><BR/>";
+
+        std::vector<std::string> productNames = node->keys[i].productsList.getAllNames();
+        for (const std::string& name : productNames) {
+            // Envolvemos el nombre del producto con sanitizeHTML
+            out << " <font point-size=\"10\">* " << sanitizeHTML(name) << "</font><BR/>";
+        }
+        out << "</TD>\n";
+    }
+    // Puerto final para el último hijo derecho extremo
+    out << "        <TD PORT=\"c" << node->n << "\"></TD>\n";
+    out << "      </TR>\n";
+    out << "      </TABLE>\n";
+    out << "    >];\n\n";
+
+    // Conectamos padres con hijos (Usando los puertos definidos en la tabla)
     if (!node->leaf) {
         for (int i = 0; i <= node->n; i++) {
             if (node->children[i] != nullptr) {
                 uintptr_t childId = reinterpret_cast<uintptr_t>(node->children[i]);
-
-                // Conectamos el puerto especifico (<c0>, <c1>...) con el nodo hijo
+                // Conectamos desde el puerto específico del padre al nodo hijo
                 out << "    node" << nodeId << ":c" << i << " -> node" << childId << ";\n";
-
-                // Llamada recursiva
                 generateDotRecursively(node->children[i], out);
             }
         }

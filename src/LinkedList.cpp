@@ -40,24 +40,29 @@ Product* LinkedList::searchByName(const std::string& name) const
     return nullptr;
 }
 
-void LinkedList::insertSorted(Product* p)
-{
+void LinkedList::insertSorted(Product* p) {
+    if (p == nullptr) return;
+
     Node* newNode = new Node(p);
-    if (head == nullptr || p->name < head->data->name)
-    {
+
+    // Caso 1: La lista está vacía, o el nuevo producto va al mismísimo principio
+    if (head == nullptr || head->data->name >= p->name) {
         newNode->next = head;
         head = newNode;
         return;
     }
+
+    // Caso 2: Buscar su posición en el medio o al final de la lista.
     Node* current = head;
-    Node* previous = nullptr;
-    while (current != nullptr && current->data->name < p->name)
-    {
-        previous = current;
+
+    // Salvavidas 2: Revisamos current->next ANTES de intentar acceder a current->next->data.
+    while (current->next != nullptr && current->next->data->name < p->name) {
         current = current->next;
     }
-    newNode->next = current;
-    previous->next = newNode;
+
+    // Insertamos el nuevo nodo justo después del 'current' donde nos detuvimos.
+    newNode->next = current->next;
+    current->next = newNode;
 }
 
 std::vector<std::string> LinkedList::getAllNames() const {

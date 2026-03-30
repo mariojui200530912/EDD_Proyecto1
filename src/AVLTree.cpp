@@ -266,53 +266,69 @@ void AVLTree::printInOrderRecursively(AVLNode* node) const {
 }
 
 void AVLTree::exportToDot(const std::string& filename) const {
-    // Abrimos (o creamos) el archivo de texto
     std::ofstream out(filename);
-
     if (!out.is_open()) {
         std::cout << "Error: No se pudo crear el archivo " << filename << "\n";
         return;
     }
 
-    // Escribimos la cabecera estandar de Graphviz para grafos dirigidos (digraph)
     out << "digraph AVLTree {\n";
-    // Le damos un poco de estilo visual a los nodos
-    out << "    node [fontname=\"Arial\", shape=circle, style=filled, fillcolor=lightblue];\n";
 
-    // Si el arbol esta vacio, dibujamos un nodo que lo indique
+    // --- NUEVO ESTILO GLOBAL AZUL ---
+    out << "    // Configuracion General\n";
+    out << "    fontname=\"Helvetica,Arial,sans-serif\";\n";
+    out << "    label=\"Arbol AVL\";\n";
+    out << "    labelloc=\"t\"; // Titulo arriba\n";
+    out << "    fontsize=20;\n";
+    out << "    nodesep=0.5; // Espacio entre nodos\n";
+    out << "    ranksep=0.7; // Espacio entre niveles\n";
+    out << "    rankdir=TB;  // Arriba hacia abajo\n\n";
+
+    out << "    // Estilo predefinido de Nodos\n";
+    // Nodos redondos, borde azul fuerte, fondo azul palido
+    out << "    node [fontname=\"Helvetica,Arial,sans-serif\", shape=ellipse, style=filled, \n";
+    out << "          fillcolor=\"#E6F3FF\", color=\"#0066CC\", fontcolor=\"#003366\", penwidth=2];\n\n";
+
+    out << "    // Estilo predefinido de Flechas\n";
+    out << "    edge [fontname=\"Helvetica,Arial,sans-serif\", color=\"#004080\", penwidth=1.5];\n\n";
+
     if (root == nullptr) {
-        out << "    empty [label=\"Arbol Vacio\"];\n";
+        out << "    empty [label=\"Arbol AVL Vacio\", shape=plaintext, fontcolor=red];\n";
     } else {
-        // Iniciamos el viaje recursivo
         generateDotRecursively(root, out);
     }
 
-    // Cerramos la llave del grafo y el archivo
     out << "}\n";
     out.close();
-
     std::cout << "Archivo " << filename << " generado con exito.\n";
 }
 
 void AVLTree::generateDotRecursively(AVLNode* node, std::ofstream& out) const {
     if (node == nullptr) return;
 
-    // Declaramos el nodo actual.
-    // Usamos su dirección de memoria como ID interno unico para Graphviz
-    out << "    " << reinterpret_cast<uintptr_t>(node)
-        << " [label=\"" << node->data->name << "\\nBF: " << getBalanceFactor(node) << "\"];\n";
+    uintptr_t nodeId = reinterpret_cast<uintptr_t>(node);
 
-    // Si tiene hijo izquierdo, declaramos la conexion (flecha) y bajamos recursivamente
+    // Dibujamos el nodo actual (usando el estilo predefinido arriba)
+    out << "    node" << nodeId << " [label=\"" << node->data->name << "\"];\n";
+
+    // Conectamos con hijo izquierdo
     if (node->left != nullptr) {
-        out << "    " << reinterpret_cast<uintptr_t>(node) << " -> "
-            << reinterpret_cast<uintptr_t>(node->left) << ";\n";
+        uintptr_t leftId = reinterpret_cast<uintptr_t>(node->left);
+        out << "    node" << nodeId << " -> node" << leftId << " [label=\"L\"];\n";
         generateDotRecursively(node->left, out);
+    } else {
+        // Opcional: Dibujar hojas nulas para ver el balanceo completo
+        // out << "    nullL" << nodeId << " [shape=point, color=gray];\n";
+        // out << "    node" << nodeId << " -> nullL" << nodeId << " [color=gray, weight=0];\n";
     }
 
-    // Si tiene hijo derecho, declaramos la conexion y bajamos recursivamente
+    // Conectamos con hijo derecho
     if (node->right != nullptr) {
-        out << "    " << reinterpret_cast<uintptr_t>(node) << " -> "
-            << reinterpret_cast<uintptr_t>(node->right) << ";\n";
+        uintptr_t rightId = reinterpret_cast<uintptr_t>(node->right);
+        out << "    node" << nodeId << " -> node" << rightId << " [label=\"R\"];\n";
         generateDotRecursively(node->right, out);
+    } else {
+        // out << "    nullR" << nodeId << " [shape=point, color=gray];\n";
+        // out << "    node" << nodeId << " -> nullR" << nodeId << " [color=gray, weight=0];\n";
     }
 }

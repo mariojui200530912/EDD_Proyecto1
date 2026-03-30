@@ -1,0 +1,45 @@
+name,barcode,category,expiry_date,brand,price,stock
+Agua Mineral 600ml,750100000001,Bebidas,2026-01-15,Bonafont,14.50,120
+Agua Mineral 1L,750100000002,Bebidas,2026-02-10,Ciel,16.00,95
+Refresco Cola 600ml,750100000003,Bebidas,2026-03-05,Coca-Cola,18.50,200
+Refresco Naranja 600ml,750100000004,Bebidas,2026-03-05,Fanta,17.50,180
+Jugo Manzana 1L,750100000005,Bebidas,2025-12-20,Del Valle,22.00,90
+Leche Entera 1L,750100000006,Lácteos,2025-11-30,Lala,24.50,75
+Leche Deslactosada 1L,750100000007,Lácteos,2025-11-28,Alpura,26.00,60
+Yogurt Fresa 1L,750100000008,Lácteos,2025-12-05,Yoplait,28.00,50
+Queso Panela 400g,750100000009,Lácteos,2025-12-15,Nochebuena,45.00,40
+Mantequilla 200g,750100000010,Lácteos,2026-01-10,Lurpak,38.00,35
+Pan Blanco Grande,750100000011,Panadería,2025-10-15,Bimbo,32.00,110
+Pan Integral,750100000012,Panadería,2025-10-18,Bimbo,34.00,95
+Galletas Chocolate,750100000013,Snacks,2026-04-01,Oreo,25.50,140
+Galletas Vainilla,750100000014,Snacks,2026-04-01,Gamesa,22.00,130
+Papas Clásicas 170g,750100000015,Snacks,2026-05-10,Sabritas,39.00,160
+Papas Queso 170g,750100000016,Snacks,2026-05-10,Ruffles,41.00,150
+Arroz Blanco 1kg,750100000017,Abarrotes,2027-01-01,Sos,29.00,200
+Frijol Negro 1kg,750100000018,Abarrotes,2027-01-01,La Costeña,34.00,180
+Azúcar 1kg,750100000019,Abarrotes,2027-06-01,Zulka,27.00,220
+Sal Refinada 1kg,750100000020,Abarrotes,2028-01-01,La Fina,15.00,300
+Aceite Vegetal 900ml,750100000021,Abarrotes,2027-08-15,Capullo,52.00,130
+Atún en Agua 140g,750100000022,Enlatados,2028-03-01,Dolores,23.00,210
+Atún en Aceite 140g,750100000023,Enlatados,2028-03-01,Tuny,25.00,190
+Sardinas 155g,750100000024,Enlatados,2028-04-01,La Costeña,21.50,160
+Maíz en Lata 220g,750100000025,Enlatados,2028-02-01,Del Monte,19.00,170
+Sopa Instantánea Pollo,750100000026,Comida Rápida,2026-09-01,Maruchan,14.00,300
+Sopa Instantánea Camarón,750100000027,Comida Rápida,2026-09-01,Maruchan,15.00,280
+Cereal Maíz 500g,750100000028,Cereales,Kellogg's,2026-06-01,42.00,120
+Cereal Chocolate 500g,750100000029,Cereales,Nestlé,2026-06-01,45.00,110
+Avena Natural 1kg,750100000030,Cereales,Quaker,2026-12-01,36.00,140
+Café Molido 250g,750100000031,Bebidas Calientes,Legal,2027-02-01,58.00,85
+Café Soluble 200g,750100000032,Bebidas Calientes,Nescafé,2027-02-01,72.00,90
+Té Manzanilla 25 sobres,750100000033,Bebidas Calientes,McCormick,2027-05-01,28.00,150
+Chocolate en Polvo 400g,750100000034,Bebidas Calientes,Abuelita,2026-11-01,49.00,100
+Detergente 1kg,750100000035,Limpieza,Ariel,2027-07-01,55.00,130
+Suavizante 850ml,750100000036,Limpieza,Downy,2027-07-01,48.00,120
+Cloro 1L,750100000037,Limpieza,Cloralex,2027-09-01,18.00,200
+Limpiador Multiusos,750100000038,Limpieza,Fabuloso,2027-09-01,22.00,180
+Jabón de Tocador,750100000039,Higiene,Dove,2027-10-01,19.50,160
+Shampoo 750ml,750100000040,Higiene,Head & Shoulders,2027-10-01,78.00,90
+Pasta Dental 150ml,750100000041,Higiene,Colgate,2027-11-01,32.00,140
+Cepillo Dental,750100000042,Higiene,Oral-B,2028-01-01,29.00,130
+Papel Higiénico 4 rollos,750100000043,Higiene,Regio,2028-01-01,45.00,100
+Toallas de Papel,750100000044,Higiene,Scott,2028-01-01,39.00,95

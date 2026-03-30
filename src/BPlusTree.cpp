@@ -1,6 +1,17 @@
 #include "../include/BPlusTree.h"
 #include <iostream>
 
+inline std::string sanitizeHTML(std::string text) {
+    std::string safeText = "";
+    for (char c : text) {
+        if (c == '&') safeText += "&amp;";
+        else if (c == '<') safeText += "&lt;";
+        else if (c == '>') safeText += "&gt;";
+        else safeText += c;
+    }
+    return safeText;
+}
+
 // --- Constructor del Nodo ---
 BPlusTreeNode::BPlusTreeNode(int _t, bool _leaf) {
     t = _t;
@@ -430,23 +441,28 @@ void BPlusTreeNode::merge(int idx) {
 // --- Funcion Principal de Exportacion ---
 void BPlusTree::exportToDot(const std::string& filename) const {
     std::ofstream out(filename);
-
     if (!out.is_open()) {
         std::cout << "Error: No se pudo abrir el archivo " << filename << "\n";
         return;
     }
 
     out << "digraph BPlusTree {\n";
-    // Pintaremos el B+ de verde claro para distinguirlo del B normal
-    out << "    node [fontname=\"Arial\", shape=record, style=filled, fillcolor=lightgreen];\n";
+
+    // --- NUEVO ESTILO GLOBAL VERDE ---
+    out << "    fontname=\"Helvetica,Arial,sans-serif\";\n";
+    out << "    label=\"Indice por Categoria (Arbol B+)\";\n";
+    out << "    labelloc=\"t\"; fontsize=20;\n";
+    out << "    nodesep=0.8; ranksep=1.0;\n\n";
+
+    out << "    node [fontname=\"Helvetica,Arial,sans-serif\", shape=plaintext];\n";
+    out << "    edge [fontname=\"Helvetica,Arial,sans-serif\", color=\"#006633\", penwidth=1.5];\n\n";
 
     if (root == nullptr) {
-        out << "    empty [label=\"Arbol B+ Vacio\"];\n";
+        out << "    empty [label=\"Arbol B+ Vacio\", shape=plaintext, fontcolor=red];\n";
     } else {
-        // Dibujamos los nodos y las flechas padre-hijo normalmente
         generateDotRecursively(root, out);
 
-        // Dibujamos la lista enlazada de las hojas
+        // --- DISEÑO DE LA LISTA ENLAZADA INFERIOR (Flecha Esmeralda Gruesa) ---
         BPlusTreeNode* leaf = getLeftmostLeaf();
         while (leaf != nullptr && leaf->next != nullptr) {
             uintptr_t currentId = reinterpret_cast<uintptr_t>(leaf);
@@ -454,7 +470,7 @@ void BPlusTree::exportToDot(const std::string& filename) const {
 
             // constraint=false evita que Graphviz deforme el arbol verticalmente
             out << "    node" << currentId << " -> node" << nextId
-                << " [color=blue, penwidth=2, constraint=false];\n";
+                << " [color=\"#00C896\", penwidth=3, style=dashed, constraint=false];\n";
 
             leaf = leaf->next;
         }
@@ -465,18 +481,39 @@ void BPlusTree::exportToDot(const std::string& filename) const {
     std::cout << "Archivo " << filename << " generado con exito.\n";
 }
 
-// --- Funcion Recursiva para dibujar Cajas y Ramas ---
 void BPlusTree::generateDotRecursively(BPlusTreeNode* node, std::ofstream& out) const {
     if (node == nullptr) return;
 
     uintptr_t nodeId = reinterpret_cast<uintptr_t>(node);
 
-    // Construimos la "caja" del nodo con las categorias
-    out << "    node" << nodeId << " [label=\"";
+    // --- DISEÑO DE TABLA HTML PARA ARBOL B+ (Tonos Verdes) ---
+    out << "    node" << nodeId << " [label=<\n";
+
+    // Si es hoja, usamos un verde mas fuerte para diferenciar
+    std::string bgColor = node->leaf ? "#E6FFFA" : "#CCF2E6";
+
+    out << "      <TABLE BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\" BGCOLOR=\"" << bgColor << "\">\n";
+    out << "      <TR>\n";
+
     for (int i = 0; i < node->n; i++) {
-        out << "<c" << i << "> | " << node->keys[i].category << " | ";
+        // Envolvemos la categoria con sanitizeHTML
+        out << "        <TD PORT=\"c" << i << "\"><font color=\"#004d33\"><b>" << sanitizeHTML(node->keys[i].category) << "</b></font>";
+
+        if (node->leaf) {
+            out << "<BR/>";
+            std::vector<std::string> productNames = node->keys[i].productsList.getAllNames();
+            for (const std::string& name : productNames) {
+                // Envolvemos el nombre con sanitizeHTML
+                out << " <font point-size=\"10\">* " << sanitizeHTML(name) << "</font><BR/>";
+            }
+        }
+        out << "</TD>\n";
     }
-    out << "<c" << node->n << ">\"];\n";
+    // Puerto final para el último hijo derecho
+    out << "        <TD PORT=\"c" << node->n << "\"></TD>\n";
+    out << "      </TR>\n";
+    out << "      </TABLE>\n";
+    out << "    >];\n\n";
 
     // Conectamos padres con hijos
     if (!node->leaf) {
