@@ -36,13 +36,26 @@ void CatalogManager::loadCatalogFromCSV(const std::string& filename) {
     std::cout << "Insertados con exito: " << successCount << "\n";
     std::cout << "Omitidos por duplicado: " << duplicateCount << "\n\n";
 
-    std::cout << "[Tiempos Acumulados de Insercion de los " << successCount << " productos]\n";
-    std::cout << "1. Tabla Hash        (O(1))    : " << tHash << " us\n";
-    std::cout << "2. Lista Secuencial  (O(1))    : " << tSeq << " us\n";
-    std::cout << "3. Lista Ordenada    (O(n))    : " << tOrd << " us\n";
-    std::cout << "4. Arbol AVL         (O(log n)): " << tAvl << " us\n";
-    std::cout << "5. Arbol B  (Fechas) (O(log n)): " << tBTree << " us\n";
-    std::cout << "6. Arbol B+ (Categ.) (O(log n)): " << tBPlus << " us\n";
+    if (successCount > 0) {
+        // Activamos los decimales fijos a 2 posiciones para que se vea profesional
+        std::cout << std::fixed << std::setprecision(2);
+
+        std::cout << "[Tiempos PROMEDIO de Insercion por producto]\n";
+
+        // La formula es: (Nanosegundos Totales / 1000.0 para hacerlos microsegundos) / Cantidad de Productos
+        std::cout << "1. Tabla Hash        (O(1))    : " << (tHash / 1000.0) / successCount << " us\n";
+        std::cout << "2. Lista Secuencial  (O(1))    : " << (tSeq / 1000.0) / successCount << " us\n";
+        std::cout << "3. Lista Ordenada    (O(n))    : " << (tOrd / 1000.0) / successCount << " us\n";
+        std::cout << "4. Arbol AVL         (O(log n)): " << (tAvl / 1000.0) / successCount << " us\n";
+        std::cout << "5. Arbol B  (Fechas) (O(log n)): " << (tBTree / 1000.0) / successCount << " us\n";
+        std::cout << "6. Arbol B+ (Categ.) (O(log n)): " << (tBPlus / 1000.0) / successCount << " us\n";
+
+        // Devolvemos la consola a su formato normal
+        std::cout << std::defaultfloat;
+    } else {
+        std::cout << "[No se insertaron productos nuevos. Tiempos no calculados.]\n";
+    }
+
     std::cout << "-----------------------------------------------\n";
 }
 
@@ -54,37 +67,37 @@ bool CatalogManager::addProduct(Product* p, double& tHash, double& tSeq, double&
         return false; // Duplicado
     }
     auto end = std::chrono::high_resolution_clock::now();
-    tHash += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    tHash += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
 
     // Cronometrar Lista Secuencial
     start = std::chrono::high_resolution_clock::now();
     sequentialList.insertFront(p);
     end = std::chrono::high_resolution_clock::now();
-    tSeq += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    tSeq += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
 
     // Cronometrar Lista Ordenada
     start = std::chrono::high_resolution_clock::now();
     orderedList.insertSorted(p);
     end = std::chrono::high_resolution_clock::now();
-    tOrd += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    tOrd += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
 
     // Cronometrar AVL Tree
     start = std::chrono::high_resolution_clock::now();
     avlTree.insert(p);
     end = std::chrono::high_resolution_clock::now();
-    tAvl += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    tAvl += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
 
     // Cronometrar B-Tree
     start = std::chrono::high_resolution_clock::now();
     bTree.insert(p);
     end = std::chrono::high_resolution_clock::now();
-    tBTree += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    tBTree += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
 
     // Cronometrar B+ Tree
     start = std::chrono::high_resolution_clock::now();
     bPlusTree.insert(p);
     end = std::chrono::high_resolution_clock::now();
-    tBPlus += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    tBPlus += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
 
     return true;
 }
@@ -158,32 +171,32 @@ bool CatalogManager::removeProduct(const std::string& barcode) {
     auto startHash = std::chrono::high_resolution_clock::now();
     hashTable.remove(barcode);
     auto endHash = std::chrono::high_resolution_clock::now();
-    auto durationHash = std::chrono::duration_cast<std::chrono::microseconds>(endHash - startHash).count();
+    auto durationHash = std::chrono::duration_cast<std::chrono::nanoseconds>(endHash - startHash).count();
 
     auto startList = std::chrono::high_resolution_clock::now();
     sequentialList.removeByBarCode(barcode);
     auto endList = std::chrono::high_resolution_clock::now();
-    auto durationList = std::chrono::duration_cast<std::chrono::microseconds>(endList - startList).count();
+    auto durationList = std::chrono::duration_cast<std::chrono::nanoseconds>(endList - startList).count();
 
     auto startListOrdered = std::chrono::high_resolution_clock::now();
     orderedList.removeByBarCode(barcode);
     auto endListOrdered = std::chrono::high_resolution_clock::now();
-    auto durationListOrdered = std::chrono::duration_cast<std::chrono::microseconds>(endListOrdered - startListOrdered).count();
+    auto durationListOrdered = std::chrono::duration_cast<std::chrono::nanoseconds>(endListOrdered - startListOrdered).count();
 
     auto startAVL = std::chrono::high_resolution_clock::now();
     avlTree.remove(nameToRemove);
     auto endAVL = std::chrono::high_resolution_clock::now();
-    auto durationAVL = std::chrono::duration_cast<std::chrono::microseconds>(endAVL - startAVL).count();
+    auto durationAVL = std::chrono::duration_cast<std::chrono::nanoseconds>(endAVL - startAVL).count();
 
     auto startBTree = std::chrono::high_resolution_clock::now();
     bTree.removeProduct(dateToRemove, barcode);
     auto endBTree = std::chrono::high_resolution_clock::now();
-    auto durationBTree = std::chrono::duration_cast<std::chrono::microseconds>(endBTree - startBTree).count();
+    auto durationBTree = std::chrono::duration_cast<std::chrono::nanoseconds>(endBTree - startBTree).count();
 
     auto startBPlusTree = std::chrono::high_resolution_clock::now();
     bPlusTree.removeProduct(categoryToRemove, barcode);
     auto endBPlusTree = std::chrono::high_resolution_clock::now();
-    auto durationBPlusTree = std::chrono::duration_cast<std::chrono::microseconds>(endBPlusTree - startBPlusTree).count();
+    auto durationBPlusTree = std::chrono::duration_cast<std::chrono::nanoseconds>(endBPlusTree - startBPlusTree).count();
 
     // 4. Liberamos la memoria del objeto
     delete p;
@@ -191,12 +204,14 @@ bool CatalogManager::removeProduct(const std::string& barcode) {
     // Reporte de tiempos
     std::cout << "\n--- Producto Eliminado Exitosamente ---\n";
     std::cout << "Tiempos de re-estructuracion:\n";
-    std::cout << " - Hash (O(1))    : " << durationHash << " us\n";
-    std::cout << " - Lista (O(n))   : " << durationList << " us\n";
-    std::cout << " - Lista Ordenada : " << durationListOrdered << " us\n";
-    std::cout << " - AVL (O(log n)) : " << durationAVL << " us\n";
-    std::cout << " - BTree (O(n))   : " << durationBTree << " us\n";
-    std::cout << " - BPlusTree (O(log n)) : " << durationBPlusTree << " us\n";
+    std::cout << std::fixed << std::setprecision(2);
+    std::cout << " - Hash (O(1))    : " << (durationHash / 1000.0) << " us\n";
+    std::cout << " - Lista (O(n))   : " << (durationList / 1000.0) << " us\n";
+    std::cout << " - Lista Ordenada : " << (durationListOrdered / 1000.0)<< " us\n";
+    std::cout << " - AVL (O(log n)) : " << (durationAVL / 1000.0)<< " us\n";
+    std::cout << " - BTree (O(n))   : " << (durationBTree / 1000.0)<< " us\n";
+    std::cout << " - BPlusTree (O(log n)) : " << (durationBPlusTree / 1000.0)<< " us\n";
+    std::cout << std::defaultfloat;
 
     return true;
 }
@@ -280,8 +295,10 @@ void CatalogManager::runPerformanceTests(int N, int M) const {
             }
 
             auto end = std::chrono::high_resolution_clock::now();
-            double duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-            totalAvg += (duration / targets.size());
+            double duration_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+            double duration_us = duration_ns / 1000.0;
+
+            totalAvg += (duration_us / targets.size());
         }
         return totalAvg / M;
     };
